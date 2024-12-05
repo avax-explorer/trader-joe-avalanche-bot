@@ -2,6 +2,8 @@
 
 This Python bot interacts with the **Trader Joe DEX** built on the **Avalanche** blockchain for fast and seamless token trading. With the help of the **Trader Joe API**, you can automate token buys and sells with minimal latency, making it perfect for real-time trading without missing opportunities.
 
+https://medium.com/@elliotpearce01/trader-joe-apis-effortless-token-trading-on-avalanche-with-real-time-transactions-d5f7dc55a331
+
 ## Features
 
 - **Real-Time Token Trading:** Execute token trades in real-time with minimal delays.
