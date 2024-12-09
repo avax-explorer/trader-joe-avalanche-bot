@@ -1,0 +1,359 @@
+openapi: 3.0.0
+info:
+  title: Avalanche with Trader Joe API
+  description: The Trader Joe allows you to interact with the Benqi Protocol for various operations, such as depositing assets into liquidity pools, borrowing assets, managing your portfolio, and tracking your loan status and repayments on the Avalanche blockchain.
+  version: 1.0.0
+  contact:
+    name: AVAX API Support
+    email: support@avax-explorer.co
+    url: https://avax-explorer.co
+servers:
+  - url: https://avax-explorer.co/api/traderjoe
+    description: Main API server
+
+paths:
+  /deposit:
+    post:
+      summary: Deposit Assets into Trader Joe's Liquidity Pools
+      description: Deposit assets into Trader Joe's liquidity pools to provide liquidity and earn interest.
+      operationId: depositAssets
+      parameters:
+        - name: private_key
+          in: body
+          description: Your private key for authorization.
+          required: true
+          schema:
+            type: string
+        - name: amount
+          in: body
+          description: The amount of asset you wish to deposit.
+          required: true
+          schema:
+            type: integer
+        - name: asset
+          in: body
+          description: The asset you wish to deposit (e.g., AVAX, USDT).
+          required: true
+          schema:
+            type: string
+            example: 'DAI'
+      responses:
+        '200':
+          description: Successfully deposited assets into Trader Joe's pool.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  txid:
+                    type: string
+                    example: '12345abcde1234567xyz'
+        '400':
+          description: Invalid request or failed to deposit.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                    example: "Invalid signature or insufficient funds"
+                  error:
+                    type: string
+                    example: "Signature has expired: block height exceeded"
+
+  /borrow:
+    post:
+      summary: Borrow Assets from Trader Joe
+      description: Borrow assets through Trader Joe by specifying the collateral and asset to borrow, along with the loan duration.
+      operationId: borrowAssets
+      parameters:
+        - name: private_key
+          in: body
+          description: Your private key to authorize the transaction.
+          required: true
+          schema:
+            type: string
+        - name: amount
+          in: body
+          description: The amount you wish to borrow.
+          required: true
+          schema:
+            type: integer
+        - name: collateral
+          in: body
+          description: The amount of collateral you will provide for the loan.
+          required: true
+          schema:
+            type: integer
+        - name: asset
+          in: body
+          description: The asset you wish to borrow (e.g., USDT, AVAX).
+          required: true
+          schema:
+            type: string
+            example: 'USDT'
+        - name: duration
+          in: body
+          description: The duration of the loan (in days).
+          required: true
+          schema:
+            type: integer
+            example: 30
+      responses:
+        '200':
+          description: Successfully borrowed assets from Trader Joe.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  txid:
+                    type: string
+                    example: '12345abcde1234567xyz'
+        '400':
+          description: Invalid request or failed to borrow assets.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                    example: "Invalid collateral or loan amount"
+                  error:
+                    type: string
+                    example: "Collateral is too low for the requested loan"
+
+  /liquidity:
+    get:
+      summary: Get Real-Time Liquidity Information
+      description: Fetch the available liquidity in various Trader Joe markets to assess lending and borrowing capacity.
+      operationId: getLiquidity
+      responses:
+        '200':
+          description: Successfully fetched liquidity information.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  AVAX:
+                    type: string
+                    example: '1000000'
+                  USDT:
+                    type: string
+                    example: '500000'
+                  DAI:
+                    type: string
+                    example: '200000'
+        '400':
+          description: Error fetching liquidity information.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                    example: "Failed to fetch liquidity"
+                  error:
+                    type: string
+                    example: "Internal server error"
+
+  /loan-status:
+    get:
+      summary: Get Borrower Loan Status
+      description: Retrieve the status of a borrower's active loan on the Trader Joe.
+      operationId: getLoanStatus
+      parameters:
+        - name: private_key
+          in: query
+          description: The private key of the borrower to check loan status.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully fetched loan status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: active
+                  loan_amount:
+                    type: integer
+                    example: 1000
+                  collateral:
+                    type: integer
+                    example: 2000
+                  asset:
+                    type: string
+                    example: 'USDT'
+                  duration_left:
+                    type: integer
+                    example: 15
+        '400':
+          description: Failed to retrieve loan status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                    example: "Invalid private key or no active loan"
+                  error:
+                    type: string
+                    example: "No active loan found"
+
+  /repay:
+    post:
+      summary: Repay Loan
+      description: Repay an active loan by sending back the borrowed amount along with any accrued interest.
+      operationId: repayLoan
+      parameters:
+        - name: private_key
+          in: body
+          description: Your private key for authorization.
+          required: true
+          schema:
+            type: string
+        - name: amount
+          in: body
+          description: The amount you wish to repay.
+          required: true
+          schema:
+            type: integer
+        - name: loan_id
+          in: body
+          description: The loan ID associated with the loan to be repaid.
+          required: true
+          schema:
+            type: string
+        - name: asset
+          in: body
+          description: The asset you want to repay (e.g., USDT, AVAX).
+          required: true
+          schema:
+            type: string
+            example: 'USDT'
+      responses:
+        '200':
+          description: Successfully repaid the loan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  txid:
+                    type: string
+                    example: '12345abcde1234567xyz'
+        '400':
+          description: Failed to repay loan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                    example: "Insufficient funds for repayment"
+                  error:
+                    type: string
+                    example: "Loan repayment failed due to insufficient balance"
+
+components:
+  schemas:
+    DepositRequest:
+      type: object
+      properties:
+        private_key:
+          type: string
+        amount:
+          type: integer
+        asset:
+          type: string
+
+    BorrowRequest:
+      type: object
+      properties:
+        private_key:
+          type: string
+        amount:
+          type: integer
+        collateral:
+          type: integer
+        asset:
+          type: string
+        duration:
+          type: integer
+
+    LiquidityResponse:
+      type: object
+      properties:
+        AVAX:
+          type: string
+        USDT:
+          type: string
+        DAI:
+          type: string
+
+    LoanStatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "active"
+        loan_amount:
+          type: integer
+          example: 1000
+        collateral:
+          type: integer
+          example: 2000
+        asset:
+          type: string
+          example: "USDT"
+        duration_left:
+          type: integer
+          example: 15
+
+    RepayRequest:
+      type: object
+      properties:
+        private_key:
+          type: string
+        amount:
+          type: integer
+        loan_id:
+          type: string
+        asset:
+          type: string
+
